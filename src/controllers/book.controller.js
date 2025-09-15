@@ -115,10 +115,121 @@ export const deleteBook = async (req, res)=>{
     }
 };
 
+export const addReviewToBook = async (req, res) => {
+  const { bookId } = req.params;
+  const { user, content, rating } = req.body;
+
+  try {
+    const book = await bookModel.findById(bookId);
+    if (!book) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Libro no encontrado",
+      });
+    }
+
+    const newReview = { user: mongoose.Types.ObjectId(user), content, rating };
+    book.reviews.push(newReview);
+    await book.save();
+
+    return res.status(201).json({
+      ok: true,
+      msg: "Review agregada correctamente",
+      data: book,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error interno del servidor",
+    });
+  }
+};
+
+export const updateReviewInBook = async (req, res) => {
+  const { bookId, reviewId } = req.params;
+  const { content, rating } = req.body;
+
+  try {
+    const book = await bookModel.findById(bookId);
+    if (!book) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Libro no encontrado",
+      });
+    }
+
+    const review = book.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Review no encontrada",
+      });
+    }
+
+    review.content = content || review.content;
+    review.rating = rating || review.rating;
+
+    await book.save();
+
+    return res.status(200).json({
+      ok: true,
+      msg: "Review actualizada correctamente",
+      data: book,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error interno del servidor",
+    });
+  }
+};
+
+export const deleteReviewFromBook = async (req, res) => {
+  const { bookId, reviewId } = req.params;
+
+  try {
+    const book = await bookModel.findById(bookId);
+    if (!book) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Libro no encontrado",
+      });
+    }
+
+    const review = book.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Review no encontrada",
+      });
+    }
+
+    review.remove();
+    await book.save();
+
+    return res.status(200).json({
+      ok: true,
+      msg: "Review eliminada correctamente",
+      data: book,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error interno del servidor",
+    });
+  }
+};
+
 export {
     createBook,
     getBookById,
     getAllBook,
     updateBook,
     deleteBook,
+    addReviewToBook,
+    updateReviewInBook,
+    deleteReviewFromBook
 };
