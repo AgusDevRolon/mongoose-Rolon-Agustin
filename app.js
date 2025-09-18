@@ -1,21 +1,27 @@
 import express from "express";
+import mongoose from "mongoose";
 import { connectDB } from "./src/config/database.js";
-import { userRoutes } from "./src/routes/user.route.js";
-import { authorRoutes } from "./src/routes/author.route.js";
-import { bookRoutes } from "./src/routes/book.route.js";
+import directorRouter from "./src/routes/director.route.js";
+import filmRouter from "./src/routes/film.route.js";
+import genreRouter from "./src/routes/genre.route.js";
+import reviewRouter from "./src/routes/reviews.route.js";
 
 const app =  express();
 const PORT= process.env.PORT || 3500;
 
-app.use("/api", userRoutes);
-app.use("/api", authorRoutes);
-app.use("/api", bookRoutes);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const starServer = async ()=>{
+app.use("/api", directorRouter);
+app.use("/api", filmRouter);
+app.use("/api", genreRouter);
+app.use("/api", reviewRouter);
+
+const startServer = async ()=>{
     await connectDB();
     app.listen(PORT, async()=>{
     console.log(`servidor escuchando en el puerto ${PORT}`);
     });
 };
 
-starServer();
+startServer();

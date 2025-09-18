@@ -1,17 +1,17 @@
-import authorModel from "../models/author.model.js";
+import directorModel from "../models/director.model.js";
+import filmModel from "../models/film.model.js"; 
 
-export const createAuthor = async (req, res)=>{
-    const {name, bio, birthdate} = req.body;
+const createDirector = async (req, res)=>{
+    const {name, country} = req.body;
     try{
-        const newAuthor = await authorModel.create({
+        const newDirector = await directorModel.create({
             name,
-            bio,
-            birthdate,
+            country
         });
         res.status(201).json({
             ok: true,
-            msg:"author creado correctamente",
-            data: newAuthor,
+            msg:"director creado correctamente",
+            data: newDirector,
         });
     } catch (error) {
         console.log(error);
@@ -22,12 +22,12 @@ export const createAuthor = async (req, res)=>{
     }
 };
 
-export const getAllAuthor = async (req, res)=>{
+const getAllDirector = async (req, res)=>{
     try{
-        const authors = await authorModel.find();
+        const directors = await directorModel.find();
         return res.status(200).json({
             ok: true,
-            data: authors,
+            data: directors,
         });
     } catch (error) {
         console.log(error);
@@ -38,19 +38,19 @@ export const getAllAuthor = async (req, res)=>{
     }
 };
 
-export const getAuthorById = async (req, res)=>{
+const getDirectorById = async (req, res)=>{
     const {id} = req.params;
     try{
-        const author = await authorModel.findById(id);
-        if (!author){
+        const director = await directorModel.findById(id);
+        if (!director){
             return res.status(404).json({
                 ok: false,
-                msg: "autor no encontrado",
+                msg: "director no encontrado",
             });
         }
         return res.status(200).json({
             ok: true,
-            data: author,
+            data: director,
         });
     } catch (error) {
         console.log(error);
@@ -61,24 +61,24 @@ export const getAuthorById = async (req, res)=>{
     }
 };
 
-export const updateAuthor = async (req, res)=>{
+const updateDirector = async (req, res)=>{
     const {id} = req.params;
     try {
-        const updateAuthor = await authorModel.findByIdAndUpdate( 
+        const updateDirector = await directorModel.findByIdAndUpdate( 
             id,
             req.body,
             {new: true}
         );
-        if (!updateAuthor){
+        if (!updateDirector){
             return res.status(404).json({
                 ok: false,
-                msg: "autor no encontrado",
+                msg: "director no encontrado",
             });
         }
         return res.status(200).json({
             ok: true,
-            msg: "autor actualizado correctamente",
-            data: updateAuthor,
+            msg: "director actualizado correctamente",
+            data: updateDirector,
         });
     } catch (error) {
         console.log(error);
@@ -89,34 +89,41 @@ export const updateAuthor = async (req, res)=>{
     }
 };
 
-export const deleteAuthor = async (req, res)=>{
-    const {id} = req.params;
-    try{
-        const deleteAuthor = await authorModel.findByIdAndDelete(id);
-        if (!deleteAuthor){
+const deleteDirector = async (req, res) => {
+    const { id } = req.params;
+    try {
+        // elimina las pelis asociadas al director
+        const filmsDeleted = await filmModel.deleteMany({ director: id });
+        
+        // elimina el director
+        const deletedDirector = await directorModel.findByIdAndDelete(id);
+        
+        if (!deletedDirector) {
             return res.status(404).json({
                 ok: false,
-                msg: "autor no encontrado",
+                msg: "Director no encontrado",
             });
         }
+        
         return res.status(200).json({
             ok: true,
-            msg: "autor eliminado correctamente",
-            data: deleteAuthor,
+            msg: `Director y ${filmsDeleted.deletedCount} película's asociada's eliminada's correctamente`,
+            data: deletedDirector,
         });
+        
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             ok: false,
-            msg: "error interno del server",
+            msg: "Error interno del servidor",
         });
     }
 };
 
 export {
-    createAuthor,
-    getAuthorById,
-    getAllAuthor,
-    updateAuthor,
-    deleteAuthor,
+    createDirector,
+    getDirectorById,
+    getAllDirector,
+    updateDirector,
+    deleteDirector,
 };
